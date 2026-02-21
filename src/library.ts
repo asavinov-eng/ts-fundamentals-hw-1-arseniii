@@ -1,22 +1,52 @@
-// TODO: імпортуй Book і типи
-// import { Book } from "./book";
-// import type { BookId } from "./types";
+import { Book } from "./book";
+import { BookId } from "./types";
 
 export class Library {
-  // TODO: реалізуй колекцію книжок (Map або іншу структуру)
-  items;
+  private books: Map<BookId, Book> = new Map();
 
-  add(item) {}
+  private getBookOrThrow(id: BookId): Book {
+    const book = this.books.get(id);
+    if (!book) {
+      throw new Error("Book not found");
+    }
+    return book;
+  }
 
-  remove(id) {}
+  public add(item: Book): void {
+    if (this.books.has(item.id)) {
+      throw new Error("Item already exists");
+    }
 
-  listAll() {}
+    this.books.set(item.id, item);
+  }
 
-  listAvailable() {}
+  public remove(id: BookId): void {
+    const book = this.getBookOrThrow(id);
 
-  borrow(bookId, personName) {}
+    if (book.getStatus() === "borrowed") {
+      throw new Error("Cannot remove borrowed item");
+    }
 
-  return(bookId) {}
+    this.books.delete(id);
+  }
 
-  getBookOrThrow(id) {}
+  public listAll(): Book[] {
+    return Array.from(this.books.values());
+  }
+
+  public listAvailable(): Book[] {
+    return this.listAll().filter(
+      (book) => book.getStatus() === "available"
+    );
+  }
+
+  public borrow(bookId: BookId, personName: string): void {
+    const book = this.getBookOrThrow(bookId);
+    book.markBorrowed(personName);
+  }
+
+  public return(bookId: BookId): void {
+    const book = this.getBookOrThrow(bookId);
+    book.markReturned();
+  }
 }
